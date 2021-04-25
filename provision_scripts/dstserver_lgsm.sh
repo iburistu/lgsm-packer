@@ -26,6 +26,9 @@ printf "[SHARD]\nshard_enabled = true" > .klei/DoNotStarveTogether/Cluster_1/clu
 ./dstserver-1 ai
 ./dstserver-2 ai
 
+# You'll need to generate and add an authentication token to run your server
+# You can find instructions here: https://docs.linuxgsm.com/game-servers/dont-starve-together#authentication-token
+
 (crontab -l 2>/dev/null; echo "*/5 * * * * /home/ubuntu/dstserver-1 monitor > /dev/null 2>&1") | crontab -
 (crontab -l 2>/dev/null; echo "*/30 * * * * /home/ubuntu/dstserver-1 update > /dev/null 2>&1") | crontab -
 (crontab -l 2>/dev/null; echo "0 0 * * 0 /home/ubuntu/dstserver-1 update-lgsm > /dev/null 2>&1") | crontab -
