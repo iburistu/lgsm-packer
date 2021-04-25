@@ -24,6 +24,7 @@ The following architectures and games are currently supported - the architecture
 -   Ark: Survival Evolved | `arkserver`
 -   Don't Starve Together | `dstserver`
 -   Minecraft Bedrock | `mcbserver`
+-   Mordhau | `mhserver`
 -   Terraria | `terrariaserver`
 -   Valheim | `vhserver`
 
