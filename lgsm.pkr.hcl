@@ -69,8 +69,8 @@ build {
     script          = "./provision_scripts/install_steamcmd.sh"
   }
 
+  # nvm doesn't require root
   provisioner "shell" {
-    execute_command = "sudo -u root /bin/bash -c '{{.Path}}'"
     script          = "./provision_scripts/install_nodejs.sh"
   }
 
@@ -98,7 +98,9 @@ build {
     script          = "./provision_scripts/install_steamcmd.sh"
   }
 
+  # Install nvm using user ubuntu
   provisioner "shell" {
+    execute_command = "su - ubuntu -c '{{.Path}}'"
     script          = "./provision_scripts/install_nodejs.sh"
   }
 
