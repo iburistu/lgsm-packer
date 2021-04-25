@@ -1,8 +1,18 @@
 locals { timestamp = formatdate("YYYYMMDD", timestamp()) }
 
-variable "region" {
+variable "aws_region" {
   type    = string
   default = "us-east-1"
+}
+
+variable "linode_region" {
+  type    = string
+  default = "us-east"
+}
+
+variable "linode_token" {
+  type    = string
+  default = ""
 }
 
 variable "game" {
@@ -12,11 +22,11 @@ variable "game" {
 source "amazon-ebs" "aws" {
   # Name the AMI according to best practices
   # https://www.cloudconformity.com/knowledge-base/aws/EC2/ami-naming-conventions.html
-  ami_name = "ami-${var.region}-p-${var.game}-${local.timestamp}"
+  ami_name = "ami-${var.aws_region}-p-${var.game}-${local.timestamp}"
   # If you use an underpowered EC2, the game install can hang for a few minutes
   # Try to use at least a c5a.large, but it could theoretically run on a t2.nano!
   instance_type = "c5a.large"
-  region        = "${var.region}"
+  region        = "${var.aws_region}"
   # Pull the most recent Ubuntu 20.04 image for compatability across different builders
   source_ami_filter {
     filters = {
@@ -40,8 +50,17 @@ source "amazon-ebs" "aws" {
     Name          = "${var.game}"
     Base_AMI_Name = "{{ .SourceAMIName }}"
     Created_On    = "${local.timestamp}"
-    Region        = "${var.region}"
+    Region        = "${var.aws_region}"
   }
+}
+
+source "linode" "linode" {
+  linode_token  = "${var.linode_token}"
+  image         = "linode/ubuntu20.04"
+  region        = "${var.linode_region}"
+  instance_type = "g6-standard-1"
+  ssh_username  = "root"
+  image_label   = "private-image-${var.linode_region}-p-${var.game}-${local.timestamp}"
 }
 
 source "docker" "docker" {
@@ -71,7 +90,7 @@ build {
 
   # nvm doesn't require root
   provisioner "shell" {
-    script          = "./provision_scripts/install_nodejs.sh"
+    script = "./provision_scripts/install_nodejs.sh"
   }
 
   provisioner "shell" {
@@ -87,15 +106,17 @@ build {
 }
 
 build {
-  sources = ["source.docker.docker"]
+  # Linode is closer to Docker than AWS lol
+  sources = ["source.docker.docker", "source.linode.linode"]
 
   # Ubuntu in a Docker container does not come with sudo installed
+  # Linode needs an ubuntu user
   provisioner "shell" {
     script = "./provision_scripts/install_sudo.sh"
   }
 
   provisioner "shell" {
-    script          = "./provision_scripts/install_steamcmd.sh"
+    script = "./provision_scripts/install_steamcmd.sh"
   }
 
   # Install nvm using user ubuntu
@@ -105,10 +126,10 @@ build {
   }
 
   provisioner "shell" {
-    script          = "./provision_scripts/${var.game}.sh"
+    script = "./provision_scripts/${var.game}.sh"
   }
 
-  # Docker is a pain - it defaults to running as root even if not told to
+  # Docker + Linode is a pain - it defaults to running as root even if not told to
   # We need to run the GAME_lgsm.sh script as ubuntu
   provisioner "shell" {
     execute_command = "su - ubuntu -c '{{.Path}}'"

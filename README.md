@@ -18,6 +18,7 @@ The following architectures and games are currently supported - the architecture
 
 -   AWS AMIs | `aws`
 -   Docker images | `docker`
+-   Linode | `linode`
 
 ### Games
 
