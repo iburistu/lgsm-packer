@@ -85,22 +85,22 @@ build {
   # Force the commands to run as root
   provisioner "shell" {
     execute_command = "sudo -u root /bin/bash -c '{{.Path}}'"
-    script          = "./provision_scripts/install_steamcmd.sh"
+    script          = "${path.root}/provision_scripts/install_steamcmd.sh"
   }
 
   # nvm doesn't require root
   provisioner "shell" {
-    script = "./provision_scripts/install_nodejs.sh"
+    script = "${path.root}/provision_scripts/install_nodejs.sh"
   }
 
   provisioner "shell" {
     execute_command = "sudo -u root /bin/bash -c '{{.Path}}'"
-    script          = "./provision_scripts/${var.game}.sh"
+    script          = "${path.root}/provision_scripts/${var.game}.sh"
   }
 
   # GAME_lgsm.sh can't be run as root!
   provisioner "shell" {
-    script = "./provision_scripts/${var.game}_lgsm.sh"
+    script = "${path.root}/provision_scripts/${var.game}_lgsm.sh"
   }
 
 }
@@ -112,28 +112,28 @@ build {
   # Ubuntu in a Docker container does not come with sudo installed
   # Linode needs an ubuntu user
   provisioner "shell" {
-    script = "./provision_scripts/install_sudo.sh"
+    script = "${path.root}/provision_scripts/install_sudo.sh"
   }
 
   provisioner "shell" {
-    script = "./provision_scripts/install_steamcmd.sh"
+    script = "${path.root}/provision_scripts/install_steamcmd.sh"
   }
 
   # Install nvm using user ubuntu
   provisioner "shell" {
     execute_command = "su - ubuntu -c '{{.Path}}'"
-    script          = "./provision_scripts/install_nodejs.sh"
+    script          = "${path.root}/provision_scripts/install_nodejs.sh"
   }
 
   provisioner "shell" {
-    script = "./provision_scripts/${var.game}.sh"
+    script = "${path.root}/provision_scripts/${var.game}.sh"
   }
 
   # Docker + Linode is a pain - it defaults to running as root even if not told to
   # We need to run the GAME_lgsm.sh script as ubuntu
   provisioner "shell" {
     execute_command = "su - ubuntu -c '{{.Path}}'"
-    script          = "./provision_scripts/${var.game}_lgsm.sh"
+    script          = "${path.root}/provision_scripts/${var.game}_lgsm.sh"
   }
 
   # Tag the image so we know what it is
