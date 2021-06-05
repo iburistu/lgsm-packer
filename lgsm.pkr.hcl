@@ -66,7 +66,7 @@ source "amazon-ebs" "aws" {
 
 source "digitalocean" "digitalocean" {
   api_token     = "${var.digitalocean_token}"
-  size          = "s-1vcpu-2gb"
+  size          = "g-2vcpu-8gb"
   image         = "ubuntu-20-04-x64"
   ssh_username  = "root"
   region        = "${var.digitalocean_region}"
