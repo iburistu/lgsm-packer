@@ -15,6 +15,16 @@ variable "linode_token" {
   default = ""
 }
 
+variable "digitalocean_token" {
+  type    = string
+  default = ""
+}
+
+variable "digitalocean_region" {
+  type    = string
+  default = "nyc3"
+}
+
 variable "game" {
   type = string
 }
@@ -52,6 +62,15 @@ source "amazon-ebs" "aws" {
     Created_On    = "${local.timestamp}"
     Region        = "${var.aws_region}"
   }
+}
+
+source "digitalocean" "digitalocean" {
+  api_token     = "${var.digitalocean_token}"
+  size          = "s-1vcpu-2gb"
+  image         = "ubuntu-20-04-x64"
+  ssh_username  = "root"
+  region        = "${var.digitalocean_region}"
+  snapshot_name = "do-${var.digitalocean_region}-p-${var.game}-${local.timestamp}"
 }
 
 source "linode" "linode" {
@@ -106,8 +125,8 @@ build {
 }
 
 build {
-  # Linode is closer to Docker than AWS lol
-  sources = ["source.docker.docker", "source.linode.linode"]
+  # Linode / DO are closer to Docker than AWS lol
+  sources = ["source.docker.docker", "source.linode.linode", "source.digitalocean.digitalocean"]
 
   # Ubuntu in a Docker container does not come with sudo installed
   # Linode needs an ubuntu user
@@ -129,7 +148,7 @@ build {
     script = "${path.root}/provision_scripts/${var.game}.sh"
   }
 
-  # Docker + Linode is a pain - it defaults to running as root even if not told to
+  # Docker + Linode + DigitalOcean is a pain - it defaults to running as root even if not told to
   # We need to run the GAME_lgsm.sh script as ubuntu
   provisioner "shell" {
     execute_command = "su - ubuntu -c '{{.Path}}'"
